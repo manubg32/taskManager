@@ -14,10 +14,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity				// Indicamos que es una entidad para la persistencia JPA en BBDD
-@Data				// Indicamos que es una entidad (@Getter @Setter @RequiredArgsConstructor @ToString @EqualsAndHashCode)
 @AllArgsConstructor	// Constructor con todos los parametros
 @NoArgsConstructor	// Constructor sin parametros
 @Builder			// Nos permite la creación más ordenada de objetos de esta clase
+@Data				// Indicamos que es una entidad (@Getter @Setter @RequiredArgsConstructor @ToString @EqualsAndHashCode)
 public class User {
 	
 	@Id							// Indicamos que este atributo será la clave primaria
