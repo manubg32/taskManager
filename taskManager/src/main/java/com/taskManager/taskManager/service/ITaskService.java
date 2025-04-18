@@ -16,5 +16,8 @@ public interface ITaskService {
 	
 	void deleteTask(Long id);				// Borrar una tarea
 
-	List <Task> getTasksByUser(User user);	// Obtener las tareas de un usuario
+	List <Task> getTasksByUsername(String username);	// Obtener las tareas de un usuario
+	
+	boolean existsById(Long id);	// Comprobar si existe una tarea
+
 }

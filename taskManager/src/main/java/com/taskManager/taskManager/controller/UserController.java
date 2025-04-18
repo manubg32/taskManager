@@ -31,7 +31,7 @@ public class UserController {
 	}
 	
 	// Llamada HTTP a la API REST para crear un usuario
-	@PostMapping("/users")
+	@PostMapping("")
 	public ResponseEntity<User> createUser (@RequestBody User user) {
 		
 		// Si el usuario ya existe, lo indicamos mediante un error 409
@@ -57,7 +57,7 @@ public class UserController {
 	}
 	
 	// Llamada HTTP a la API REST para obtener un usuario
-	@GetMapping("/users/{username}")
+	@GetMapping("/{username}")
 	public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
 		User user = userService.getUserByUsername(username); 	// Obtenemos el usuario
 		
@@ -73,7 +73,7 @@ public class UserController {
 	}
 	
 	// Llamada HTTP a la API REST para obtener todos los usuarios
-	@GetMapping("/users")
+	@GetMapping("")
 	public ResponseEntity<List<User>> getAllUsers() {
 		List<User> users = userService.getAllUsers();
 		
@@ -89,7 +89,7 @@ public class UserController {
 	}
 	
 	// Llamada HTTP a la API REST para comprobar si existe un usuario
-	@GetMapping("/users/check/{username}")
+	@GetMapping("/check/{username}")
 	public ResponseEntity<Void> checkIfUserExists(@PathVariable String username) {
 		
 		boolean exists = userService.existsByUsername(username);

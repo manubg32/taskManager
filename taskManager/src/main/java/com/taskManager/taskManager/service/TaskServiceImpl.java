@@ -45,10 +45,15 @@ public class TaskServiceImpl implements ITaskService {
 
 	// Método para obtener todas las tareas de un usuario
 	@Override
-	public List<Task> getTasksByUser(User user) {
-		return taskRepository.findByUser(user);
+	public List<Task> getTasksByUsername(String username) {
+	    return taskRepository.findByUserUsername(username);
+
 	}
 
-	
+	// Método para comprobar si existe una tarea por Id
+	@Override
+	public boolean existsById(Long id) {
+		return taskRepository.existsById(id);
+	}
 	
 }

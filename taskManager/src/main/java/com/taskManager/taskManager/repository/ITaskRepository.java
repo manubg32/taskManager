@@ -9,5 +9,7 @@ import com.taskManager.taskManager.model.User;
 
 // Interfaz que recoge los métodos para comunicarse con la BD relacionados con las tareas
 public interface ITaskRepository extends JpaRepository<Task, Long> {
-	List<Task> findByUser(User user);	//Obtener tareas por usuario
+	List<Task> findByUserUsername(String username);	//Obtener tareas por usuario
+	boolean existsById(Long id);		// Comprobar si existe el id de la tarea
+
 }
