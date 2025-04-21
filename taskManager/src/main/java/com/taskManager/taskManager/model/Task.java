@@ -38,5 +38,5 @@ public class Task {
 	
 	@ManyToOne					//Relación N:1
 	@JoinColumn(name = "user_id")// Clave foránea que relaciona la tarea con el usuario
-	private User user;
+	private AppUser user;
 }

@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.taskManager.taskManager.model.Task;
-import com.taskManager.taskManager.model.User;
+import com.taskManager.taskManager.model.AppUser;
 import com.taskManager.taskManager.repository.ITaskRepository;
 
 @Service	// Indicamos a Spring Boot que es un bean de servicio

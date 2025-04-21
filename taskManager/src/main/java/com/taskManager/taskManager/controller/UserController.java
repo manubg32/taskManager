@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.taskManager.taskManager.model.User;
+import com.taskManager.taskManager.model.AppUser;
 import com.taskManager.taskManager.service.IUserService;
 
 @RestController				// Indicamos que es un controlador
@@ -32,7 +32,7 @@ public class UserController {
 	
 	// Llamada HTTP a la API REST para crear un usuario
 	@PostMapping("")
-	public ResponseEntity<User> createUser (@RequestBody User user) {
+	public ResponseEntity<AppUser> createUser (@RequestBody AppUser user) {
 		
 		// Si el usuario ya existe, lo indicamos mediante un error 409
 		if (userService.existsByUsername(user.getUsername())) {
@@ -47,7 +47,7 @@ public class UserController {
 	    }
 
 	    try {
-	        User saved = userService.registerUser(user);
+	        AppUser saved = userService.registerUser(user);
 	        logger.info("User '{}' registered correctly", user.getUsername());
 	        return new ResponseEntity<>(saved, HttpStatus.CREATED);	//Si se crea correctamente, devolvemos el usuario y un codigo 201
 	    } catch (Exception e) {
@@ -58,8 +58,8 @@ public class UserController {
 	
 	// Llamada HTTP a la API REST para obtener un usuario
 	@GetMapping("/{username}")
-	public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
-		User user = userService.getUserByUsername(username); 	// Obtenemos el usuario
+	public ResponseEntity<AppUser> getUserByUsername(@PathVariable String username) {
+		AppUser user = userService.getUserByUsername(username); 	// Obtenemos el usuario
 		
 		// Si el usuario no existe devolvemos un 404
 		if (user == null) {
@@ -74,8 +74,8 @@ public class UserController {
 	
 	// Llamada HTTP a la API REST para obtener todos los usuarios
 	@GetMapping("")
-	public ResponseEntity<List<User>> getAllUsers() {
-		List<User> users = userService.getAllUsers();
+	public ResponseEntity<List<AppUser>> getAllUsers() {
+		List<AppUser> users = userService.getAllUsers();
 		
 		// Si no hay usuarios devolvemos un 204
 		if (users.isEmpty()) {

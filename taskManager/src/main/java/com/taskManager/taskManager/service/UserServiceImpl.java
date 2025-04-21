@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.taskManager.taskManager.model.User;
+import com.taskManager.taskManager.model.AppUser;
 import com.taskManager.taskManager.repository.IUserRepository;
 
 @Service	// Indicamos a Spring Boot que es un bean de servicio
@@ -20,13 +20,13 @@ public class UserServiceImpl implements IUserService {
 
 	// Método para obetener el usuario por el nombre de usuario
 	@Override
-	public User getUserByUsername(String username) {
+	public AppUser getUserByUsername(String username) {
 		return userRepository.findByUsername(username).orElse(null);
 	}
 
 	// Método para dar de alta un nuevo usuario
 	@Override
-	public User registerUser(User user) {
+	public AppUser registerUser(AppUser user) {
 		return userRepository.save(user);
 	}
 
@@ -38,7 +38,7 @@ public class UserServiceImpl implements IUserService {
 
 	// Método para obtener una lista con todos los usuarios
 	@Override
-	public List<User> getAllUsers() {
+	public List<AppUser> getAllUsers() {
 		return userRepository.findAll();
 	}
 

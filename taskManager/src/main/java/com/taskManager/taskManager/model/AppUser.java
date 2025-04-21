@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor	// Constructor sin parametros
 @Builder			// Nos permite la creación más ordenada de objetos de esta clase
 @Data				// Indicamos que es una entidad (@Getter @Setter @RequiredArgsConstructor @ToString @EqualsAndHashCode)
-public class User {
+public class AppUser {
 	
 	@Id							// Indicamos que este atributo será la clave primaria
 	@GeneratedValue				// Y que se generará automaticamente
