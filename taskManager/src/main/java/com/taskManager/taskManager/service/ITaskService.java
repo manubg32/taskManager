@@ -3,7 +3,6 @@ package com.taskManager.taskManager.service;
 import java.util.List;
 
 import com.taskManager.taskManager.model.Task;
-import com.taskManager.taskManager.model.AppUser;
 
 // Interfaz que define los métodos para tratar la información relacionada con las tareas
 public interface ITaskService {

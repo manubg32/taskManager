@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.taskManager.taskManager.model.Task;
-import com.taskManager.taskManager.model.AppUser;
 import com.taskManager.taskManager.service.ITaskService;
 
 @RestController				// Indicamos que es un controlador

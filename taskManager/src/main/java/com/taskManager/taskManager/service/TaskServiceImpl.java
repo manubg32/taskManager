@@ -1,7 +1,6 @@
 package com.taskManager.taskManager.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -13,10 +12,13 @@ import com.taskManager.taskManager.repository.ITaskRepository;
 public class TaskServiceImpl implements ITaskService {
 
 	private final ITaskRepository taskRepository;
+    private final IUserService userService;
+
 	
 	// Método constructor: Inyectamos el repositorio en la clase
-	public TaskServiceImpl(ITaskRepository taskRepository) {
+	public TaskServiceImpl(ITaskRepository taskRepository, IUserService userService) {
 		this.taskRepository = taskRepository;
+		this.userService = userService;
 	}
 	
 	// Método para obtener todas las tareas
@@ -34,7 +36,16 @@ public class TaskServiceImpl implements ITaskService {
 	// Método para crear una tarea
 	@Override
 	public Task createTask(Task task) {
-		return taskRepository.save(task);
+		 // Recuperar el usuario desde la base de datos
+	    AppUser user = userService.getUserByUsername(task.getUser().getUsername());
+	    if (user == null) {
+	        throw new IllegalArgumentException("User does not exist");
+	    }
+
+	    // Asociar el usuario persistido a la tarea
+	    task.setUser(user);
+
+	    return taskRepository.save(task);
 	}
 
 	// Método para borrar una tarea

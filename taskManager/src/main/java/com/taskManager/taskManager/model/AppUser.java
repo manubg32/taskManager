@@ -2,6 +2,8 @@ package com.taskManager.taskManager.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -32,5 +34,6 @@ public class AppUser {
 	private ERole role;
 	
 	@OneToMany(mappedBy = "user")// Indicamos que un usuario tendrá varias tareas 1:N y que estarán mapeadas a este
+	@JsonIgnore // Para que no haya recursividad infinita al obtenerlo
 	private List<Task> tasks;
 }
