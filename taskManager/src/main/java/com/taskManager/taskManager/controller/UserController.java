@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.taskManager.taskManager.dto.LoginRequest;
 import com.taskManager.taskManager.model.AppUser;
 import com.taskManager.taskManager.service.IUserService;
 
@@ -26,12 +28,17 @@ public class UserController {
 	// Instanciamos la interfaz que contiene los métodos
 	private final IUserService userService;		
 	
-	public UserController(IUserService userService) {
+	// Instanciamos el passwordEncoder
+	private final PasswordEncoder passwordEncoder;	
+	
+	// Inyectamos la interfaz y el passwordEncoder
+	public UserController(IUserService userService, PasswordEncoder passwordEncoder) {
 		this.userService = userService;
+		this.passwordEncoder = passwordEncoder;
 	}
 	
 	// Llamada HTTP a la API REST para crear un usuario
-	@PostMapping("")
+	@PostMapping("/create")
 	public ResponseEntity<AppUser> createUser (@RequestBody AppUser user) {
 		
 		// Si el usuario ya existe, lo indicamos mediante un error 409
@@ -57,7 +64,7 @@ public class UserController {
 	}
 	
 	// Llamada HTTP a la API REST para obtener un usuario
-	@GetMapping("/{username}")
+	@GetMapping("/get/{username}")
 	public ResponseEntity<AppUser> getUserByUsername(@PathVariable String username) {
 		AppUser user = userService.getUserByUsername(username); 	// Obtenemos el usuario
 		
@@ -73,7 +80,7 @@ public class UserController {
 	}
 	
 	// Llamada HTTP a la API REST para obtener todos los usuarios
-	@GetMapping("")
+	@GetMapping("/getAll")
 	public ResponseEntity<List<AppUser>> getAllUsers() {
 		List<AppUser> users = userService.getAllUsers();
 		
@@ -99,6 +106,20 @@ public class UserController {
 		return ResponseEntity
 				.status(exists ? HttpStatus.CONFLICT : HttpStatus.OK)
 				.build();
+	}
+	
+	// Llamada HTTP a la API REST para loggearnos
+	@PostMapping("/login")
+	public ResponseEntity<AppUser> login(@RequestBody LoginRequest loginRequest) {
+		AppUser user = userService.getUserByUsername(loginRequest.getUsername());
+		
+		if (user == null || !passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+			logger.warn("Invalid login attempt for user '{}'", user.getUsername());
+			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+		}
+		
+		logger.info("User '{}' logged in successfully", user.getUsername());
+		return new ResponseEntity<>(user, HttpStatus.OK);
 	}
 	
 }

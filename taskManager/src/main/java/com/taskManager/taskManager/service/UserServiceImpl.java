@@ -2,19 +2,23 @@ package com.taskManager.taskManager.service;
 
 import java.util.List;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.taskManager.taskManager.model.AppUser;
+import com.taskManager.taskManager.model.ERole;
 import com.taskManager.taskManager.repository.IUserRepository;
 
 @Service	// Indicamos a Spring Boot que es un bean de servicio
 public class UserServiceImpl implements IUserService {
 	
 	private final IUserRepository userRepository;
+	private final PasswordEncoder passwordEncoder;
 	
-	// Método constructor: Inyectamos el repositorio en la clase
-	public UserServiceImpl(IUserRepository userRepository) {
+	// Método constructor: Inyectamos el repositorio en la clase y el passwordEncoder
+	public UserServiceImpl(IUserRepository userRepository, PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	// Método para obetener el usuario por el nombre de usuario
@@ -26,6 +30,13 @@ public class UserServiceImpl implements IUserService {
 	// Método para dar de alta un nuevo usuario
 	@Override
 	public AppUser registerUser(AppUser user) {
+		
+		// Si no tiene rol asignado, se pone USER por defecto
+	    if (user.getRole() == null) {
+	        user.setRole(ERole.USER);   
+	    }
+		// Codificamos la contraseña antes de guardarla
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 		return userRepository.save(user);
 	}
 
