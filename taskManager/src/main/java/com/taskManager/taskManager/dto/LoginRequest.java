@@ -1,16 +1,8 @@
 package com.taskManager.taskManager.dto;
 
 public class LoginRequest {
-	
 	private String username;
 	private String password;
-	
-	public LoginRequest() {}
-	
-	public LoginRequest(String username, String password) {
-		setUsername(username);
-		setPassword(password);
-	}
 
 	public String getUsername() {
 		return username;
@@ -27,7 +19,5 @@ public class LoginRequest {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
-	
 
 }

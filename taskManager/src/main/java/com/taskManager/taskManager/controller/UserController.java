@@ -6,6 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.taskManager.taskManager.dto.LoginRequest;
+import com.taskManager.taskManager.dto.LoginResponse;
 import com.taskManager.taskManager.model.AppUser;
+import com.taskManager.taskManager.security.JwtUtil;
 import com.taskManager.taskManager.service.IUserService;
 
 @RestController				// Indicamos que es un controlador
@@ -31,10 +37,18 @@ public class UserController {
 	// Instanciamos el passwordEncoder
 	private final PasswordEncoder passwordEncoder;	
 	
-	// Inyectamos la interfaz y el passwordEncoder
-	public UserController(IUserService userService, PasswordEncoder passwordEncoder) {
+	// Instanciamos el AuthenticationManager
+	private final AuthenticationManager authenticationManager;
+	
+	// Instanciamos el JwtUtil
+	private final JwtUtil jwtUtil;
+	
+	// Inyectamos la interfaz, el passwordEncoder, el authManager y el JwtUtil
+	public UserController(IUserService userService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
 		this.userService = userService;
 		this.passwordEncoder = passwordEncoder;
+		this.authenticationManager = authenticationManager;
+	    this.jwtUtil= jwtUtil;
 	}
 	
 	// Llamada HTTP a la API REST para crear un usuario
@@ -108,18 +122,20 @@ public class UserController {
 				.build();
 	}
 	
-	// Llamada HTTP a la API REST para loggearnos
+	// Llamada HTTP a la API REST para logearse
 	@PostMapping("/login")
-	public ResponseEntity<AppUser> login(@RequestBody LoginRequest loginRequest) {
-		AppUser user = userService.getUserByUsername(loginRequest.getUsername());
+	public LoginResponse login(@RequestBody LoginRequest request) {
+		Authentication authentication = authenticationManager.authenticate(
+				new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+				);
 		
-		if (user == null || !passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-			logger.warn("Invalid login attempt for user '{}'", user.getUsername());
-			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-		}
+		UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 		
-		logger.info("User '{}' logged in successfully", user.getUsername());
-		return new ResponseEntity<>(user, HttpStatus.OK);
+		// Generamos el token
+		String token = jwtUtil.generateToken(userDetails.getUsername());
+				
+		return new LoginResponse(token);
 	}
+	
 	
 }
