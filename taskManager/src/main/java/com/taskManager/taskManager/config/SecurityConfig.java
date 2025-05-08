@@ -38,7 +38,7 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Le quitamos la responsabilidad de la gestion de la seguridad a Spring Security
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/users/login", "/users/create", "/users/check/**").permitAll() // Permitimos el acceso libre a /login y a /check 
-            .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Permitimos el acceso libre a swagger y a api-docs
+            .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**").permitAll() // Permitimos el acceso libre a swagger y a api-docs
             .anyRequest().authenticated() // El resto de peticiones necesitaran autenticacion
         )
         .authenticationProvider(authenticationProvider()) // Declaramos quien tendra la responsabilidad de autenticar
