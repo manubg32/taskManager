@@ -130,7 +130,7 @@ public class TaskController {
 					
 				}
 		
-		// Llamada HTTP a la API REST para actualizar una tarea
+		// Llamada HTTP a la API REST para actualizar una tarea desde el frontend
 		@PutMapping("/edit/{id}")
 		public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody TaskRequestDTO taskDto) {
 			Task existingTask = taskService.getTaskById(id);
@@ -197,7 +197,7 @@ public class TaskController {
 		}
 		
 		
-		// Llamada HTTP a la API REST para alternar el estado de una tarea
+		// Llamada HTTP a la API REST para alternar el estado de una tarea desde el frontend
 		@PutMapping("/{id}/toggle-completed")
 		public ResponseEntity<Void> toggleCompleted(
 		        @PathVariable Long id,
