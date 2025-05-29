@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Tareas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            padding: 30px;
+            background-color: #f9f9f9;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        #taskList {
+            list-style: none;
+            padding: 0;
+        }
+
+        .task {
+            display: flex;
+            align-items: flex-start;
+            background-color: #fff;
+            margin-bottom: 15px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .task:hover {
+            transform: scale(1.01);
+        }
+
+        .task input[type="checkbox"] {
+            margin-right: 20px;
+            margin-top: 5px;
+        }
+
+        .task-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .task-title {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .task .completed .task-title {
+            text-decoration: line-through;
+            color: gray;
+        }
+
+        .priority-HIGH {
+            border-left: 6px solid #e74c3c;
+        }
+
+        .priority-MEDIUM {
+            border-left: 6px solid #f39c12;
+        }
+
+        .priority-LOW {
+            border-left: 6px solid #27ae60;
+        }
+
+        .task-info div {
+            margin-top: 4px;
+        }
+		
+		.task.completed {
+		    opacity: 0.6;
+		    filter: grayscale(100%);
+		}
+
+        #errorMessage {
+            color: red;
+            margin-top: 20px;
+        }
+		
+		.create-button {
+		       display: inline-block;
+		       background-color: #007bff;
+		       color: white;
+		       padding: 0.6rem 1.2rem;
+		       border-radius: 6px;
+		       text-decoration: none;
+		       font-size: 1rem;
+		       transition: background-color 0.3s ease;
+		   }
+
+		   .create-button:hover {
+		       background-color: #0056b3;
+		   }
+    </style>
+</head>
+<body>
+    <h2>Mis Tareas</h2>
+	<div style="margin: 1rem 0;">
+	    <a href="/tasks/create/view" class="create-button">+ Nueva Tarea</a>
+	</div>
+    <ul id="taskList"></ul>
+    <p id="errorMessage"></p>
+
+    <script>
+        const token = localStorage.getItem("token");
+        const username = localStorage.getItem("username");
+
+        function sortTasksByPriority(tasks) {
+            const priorityOrder = { HIGH: 1, MEDIUM: 2, LOW: 3, FINISHED: 4 };
+            return tasks.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+        }
+
+        function updateTaskCompletion(taskId, currentState) {
+            fetch(`/tasks/${taskId}/toggle-completed`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": "Bearer " + token,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ complete: !currentState })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Error al actualizar la tarea");
+                location.reload();
+            })
+            .catch(error => {
+                document.getElementById("errorMessage").textContent = error.message;
+            });
+        }
+
+        if (!token || !username) {
+            document.getElementById("errorMessage").textContent = "No estás autenticado.";
+        } else {
+            fetch(`/tasks/user/${username}`, {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Error al obtener las tareas");
+                return response.json();
+            })
+            .then(data => {
+
+				const tasks = data
+				    .sort((a, b) => {
+				        // Ordenar primero por si están completas (false antes que true)
+				        if (a.complete !== b.complete) {
+				            return a.complete - b.complete;
+				        }
+				        // Si están igual de completas, ordenar por prioridad
+				        const priorityOrder = { HIGH: 1, MEDIUM: 2, LOW: 3, FINISHED: 4 };
+				        return priorityOrder[a.priority] - priorityOrder[b.priority];
+				    });
+
+				
+                const taskList = document.getElementById("taskList");
+
+                tasks.forEach(task => {
+                    const li = document.createElement("li");
+                    li.className = `task priority-${task.priority}` + (task.complete ? " completed" : "");
+
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.checked = task.complete;
+                    checkbox.addEventListener("change", () => updateTaskCompletion(task.id, task.complete));
+					
+					// Crear boton de borrar
+					  const deleteButton = document.createElement("button");
+					  deleteButton.textContent = "🗑️ Borrar";
+					  
+					  deleteButton.style.backgroundColor = "#e74c3c";
+					  deleteButton.style.color = "white";
+					  deleteButton.style.border = "none";
+					  deleteButton.style.padding = "6px 10px";
+					  deleteButton.style.borderRadius = "6px";
+					  deleteButton.style.cursor = "pointer";
+					  
+					  deleteButton.addEventListener("click", () => {
+					      const confirmDelete = confirm(`¿Seguro que quieres borrar la tarea "${task.title}"?`);
+					      if (confirmDelete) {
+					          fetch(`/tasks/${task.id}`, {
+					              method: "DELETE",
+					              headers: {
+					                  "Authorization": "Bearer " + token
+					              }
+					          })
+					          .then(response => {
+					              if (!response.ok) throw new Error("Error al borrar la tarea");
+					              li.remove(); // Eliminar el elemento del DOM
+					          })
+					          .catch(error => {
+					              document.getElementById("errorMessage").textContent = error.message;
+					          });
+					      }
+					  });
+					  
+					  // Crear botón de editar
+					  const editButton = document.createElement("button");
+					  editButton.textContent = "✏️ Editar";
+					  editButton.style.marginTop = "8px";
+					  editButton.style.backgroundColor = "#007bff";
+					  editButton.style.color = "white";
+					  editButton.style.border = "none";
+					  editButton.style.padding = "6px 10px";
+					  editButton.style.borderRadius = "6px";
+					  editButton.style.cursor = "pointer";
+					  editButton.style.display = "block";
+
+					  // Redirigir al formulario de edición (puedes adaptar esta ruta)
+					  editButton.addEventListener("click", () => {
+					      fetch(`/tasks/edit/view/${task.id}`, {
+					          method: 'GET',
+					          headers: {
+					              'Authorization': `Bearer ${token}`
+					          }
+					      })
+					      .then(response => {
+					          if (!response.ok) {
+					              if(response.status === 401) {
+					                  alert("No estás autenticado o tu sesión expiró.");
+					                  window.location.href = '/login';
+					                  return;
+					              }
+					              throw new Error('Error al cargar la tarea');
+					          }
+					          return response.text();
+					      })
+					      .then(html => {
+					          // Sobrescribir el DOM con la vista recibida
+					          document.open();
+					          document.write(html);
+					          document.close();
+					      })
+					      .catch(error => {
+					          console.error(error);
+					          alert('Error al cargar la vista de edición.');
+					      });
+					  });
+
+                    const info = document.createElement("div");
+                    info.className = "task-info";
+
+                    info.innerHTML = `
+                        <div class="task-title">${task.title} (ID: ${task.id})</div>
+                        <div><strong>Descripción:</strong> ${task.description}</div>
+                        <div><strong>Fecha límite:</strong> ${task.dueDate}</div>
+                        <div><strong>Prioridad:</strong> ${task.priority}</div>
+                        <div><strong>Completada:</strong> ${task.complete ? "Sí" : "No"}</div>
+                    `;
+					
+					const buttonContainer = document.createElement("div");
+					buttonContainer.style.display = "flex";
+					buttonContainer.style.flexDirection = "column";
+					buttonContainer.style.alignItems = "flex-end";
+					buttonContainer.style.marginLeft = "auto";
+
+					buttonContainer.appendChild(deleteButton);
+					buttonContainer.appendChild(editButton);
+
+                    li.appendChild(checkbox);
+                    li.appendChild(info);
+					li.appendChild(buttonContainer);
+
+
+                    taskList.appendChild(li);
+                });
+            })
+            .catch(error => {
+                document.getElementById("errorMessage").textContent = "No tienes ninguna tarea, deberías hacer algo...";
+            });
+        }
+    </script>
+</body>
+</html>

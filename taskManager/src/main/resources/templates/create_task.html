@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Tarea - Task Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 2rem 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #444;
+            margin-top: 1rem;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.6rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.7rem;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1a7742;
+        }
+
+        #errorMessage {
+            color: red;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        #successMessage {
+            color: green;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .back-link a {
+            color: #27ae60;
+            text-decoration: none;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Crear Nueva Tarea</h2>
+        <form id="createTaskForm">
+            <label for="title">Título:</label>
+            <input type="text" id="title" name="title" required>
+
+            <label for="description">Descripción:</label>
+            <textarea id="description" name="description" rows="4" required></textarea>
+
+            <label for="dueDate">Fecha límite:</label>
+            <input type="date" id="dueDate" name="dueDate" required>
+
+            <label for="priority">Prioridad:</label>
+            <select id="priority" name="priority" required>
+                <option value="LOW">Baja</option>
+                <option value="MEDIUM">Media</option>
+                <option value="HIGH">Alta</option>
+            </select>
+
+            <button type="submit">Guardar Tarea</button>
+        </form>
+
+        <p id="errorMessage"></p>
+        <p id="successMessage"></p>
+
+        <div class="back-link">
+            <a href="/tasks/view">← Volver a Mis Tareas</a>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem("token");
+        const username = localStorage.getItem("username");
+
+        if (!token || !username) {
+            document.getElementById("errorMessage").textContent = "Debes iniciar sesión.";
+        }
+
+        document.getElementById("createTaskForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const title = document.getElementById("title").value;
+            const description = document.getElementById("description").value;
+            const dueDate = document.getElementById("dueDate").value;
+            const priority = document.getElementById("priority").value;
+
+            const task = { title, description, dueDate, priority, complete:false, username };
+
+            try {
+                const response = await fetch(`/tasks/create`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Bearer " + token,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(task)
+                });
+
+                if (response.ok) {
+                    document.getElementById("successMessage").textContent = "Tarea creada correctamente.";
+                    document.getElementById("createTaskForm").reset();
+					setTimeout(() => {
+					        window.history.back();
+					    }, 500);
+                } else {
+                    const errorData = await response.text();
+                    throw new Error(errorData || "Error al crear la tarea.");
+                }
+            } catch (error) {
+                document.getElementById("errorMessage").textContent = error.message;
+            }
+        });
+    </script>
+</body>
+</html>

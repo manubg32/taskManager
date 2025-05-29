@@ -18,5 +18,7 @@ public interface ITaskService {
 	List <Task> getTasksByUsername(String username);	// Obtener las tareas de un usuario
 	
 	boolean existsById(Long id);	// Comprobar si existe una tarea
+	
+	Task save(Task task); // Guardar
 
 }

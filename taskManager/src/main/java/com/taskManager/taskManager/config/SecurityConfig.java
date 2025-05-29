@@ -2,6 +2,7 @@ package com.taskManager.taskManager.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -37,8 +38,12 @@ public class SecurityConfig {
         .csrf(csrf -> csrf.disable()) // Desactivamos la proteccion csrf
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Le quitamos la responsabilidad de la gestion de la seguridad a Spring Security
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/users/login", "/users/create", "/users/check/**").permitAll() // Permitimos el acceso libre a /login y a /check 
+            .requestMatchers("/users/login", "/users/create", "/users/check/**", "/users/login/view", "/users/register/view", "/tasks/view", "/tasks/create/view", "/tasks/edit/view/**").permitAll() // Permitimos el acceso libre a estos endpoints 
             .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**").permitAll() // Permitimos el acceso libre a swagger y a api-docs
+            .requestMatchers(HttpMethod.PUT, "/tasks/edit/**").authenticated()
+            .requestMatchers(HttpMethod.GET, "/users/getAll").hasRole("ADMIN")
+            .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
+            .requestMatchers("/tasks/**").hasAnyRole("USER", "ADMIN")
             .anyRequest().authenticated() // El resto de peticiones necesitaran autenticacion
         )
         .authenticationProvider(authenticationProvider()) // Declaramos quien tendra la responsabilidad de autenticar

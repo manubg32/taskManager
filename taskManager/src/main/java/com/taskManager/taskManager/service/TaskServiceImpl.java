@@ -67,4 +67,14 @@ public class TaskServiceImpl implements ITaskService {
 		return taskRepository.existsById(id);
 	}
 	
+	// Método para guardar una tarea
+	@Override
+	public Task save(Task task) {
+	    AppUser user = userService.getUserByUsername(task.getUser().getUsername());
+	    if (user == null) {
+	        throw new IllegalArgumentException("User does not exist");
+	    }
+	    task.setUser(user);
+	    return taskRepository.save(task);
+	}
 }
